@@ -16,7 +16,7 @@
     <!-- Navbar -->
     <nav>
 
-        <h1>CodeSync</h1>
+        <h1>💻 CodeSync</h1>
 
         <!-- Buttons -->
         <div class="nav-buttons">
@@ -35,7 +35,13 @@
         <!-- Sidebar -->
         <aside>
 
-            <h2>Users</h2>
+            <h2>Connected Users</h2>
+
+            <!-- User List -->
+            <ul class="user-list">
+                <li>🟢 User1</li>
+                <li>🟢 User2</li>
+                <li>🔴 User3</li>
 
         </aside>
 
@@ -51,11 +57,44 @@
 
            </div>
 
-            <textarea placeholder="Write your code here..."></textarea>
+            
+            <!-- Editor Wrapper -->
+<div class="editor-wrapper">
+
+    <!-- Fake Line Numbers -->
+    <div class="line-numbers">
+
+        1<br>
+        2<br>
+        3<br>
+        4<br>
+        5<br>
+
+    </div>
+
+    <!-- Code Editor -->
+    <textarea placeholder="Write your code here..."></textarea>
+
+</div>
+
+            <!-- Output Section -->
+            <div class="output-section">
+                <h3>Output</h3>
+                <div class="output-box">
+                   Output will be displayed here...
+                </div>
+            </div>
 
         </main>
 
     </div>
+
+    <!-- Status Bar -->
+<footer>
+
+    <p>Connected | JavaScript | UTF-8</p>
+
+</footer>
 
     <!-- JS File -->
     <script src="script.js"></script>

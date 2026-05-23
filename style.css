@@ -42,7 +42,13 @@ button {
     background-color: white;
     color: black;
 
+    border-radius: 6px;
+
     cursor: pointer;
+    transition: background-color 0.3s;
+}
+button:hover {
+    background-color: #d1d5db;
 }
 
 /* Main container */
@@ -56,7 +62,8 @@ button {
 aside {
     width: 250px;
 
-    background-color: lightgray;
+    background-color: #111827;
+    color: white;
 
     padding: 20px;
 }
@@ -68,6 +75,8 @@ main {
     background-color: white;
 
     padding: 20px;
+
+    overflow-y: auto;
 }
 
 /* Editor textarea */
@@ -75,8 +84,6 @@ textarea {
     width: 100%;
 
     height: 400px;
-
-    margin-top: 20px;
 
     padding: 20px;
 
@@ -87,7 +94,6 @@ textarea {
     font-family: monospace;
 
     border: none;
-    border-radius: 10px; ;
 
     resize: none;
 
@@ -99,4 +105,89 @@ textarea {
 
     justify-content: space-between;
     align-items: center;
+}
+/* Output section */
+.output-section {
+    margin-top: 20px;
+}
+
+/* Output box */
+.output-box {
+    margin-top: 10px;
+
+    min-height: 120px;
+
+    padding: 15px;
+
+    background-color: #111;
+
+    color: #00ff80;
+
+    border-radius: 10px;
+
+    font-family: monospace;
+
+    overflow-x: auto;
+}
+/* User list */
+.user-list {
+    margin-top: 20px;
+
+    list-style: none;
+}
+
+/* Each user */
+.user-list li {
+    padding: 12px;
+
+    margin-bottom: 10px;
+
+    background-color: #1f2937;
+
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+}
+/* Status bar */
+footer {
+    height: 35px;
+
+    background-color: #0f172a;
+
+    color: white;
+
+    display: flex;
+    align-items: center;
+
+    padding-left: 15px;
+
+    font-size: 14px;
+
+    border-top: 1px solid #1f2937;
+}
+/* Editor wrapper */
+.editor-wrapper {
+    display: flex;
+
+    margin-top: 20px;
+
+    background-color: #1e1e1e;
+
+    border-radius: 10px;
+
+    overflow: hidden;
+}
+/* Line numbers */
+.line-numbers {
+    padding: 20px 10px;
+
+    background-color: #111;
+
+    color: gray;
+
+    text-align: right;
+
+    font-family: monospace;
+
+    line-height: 1.5;
 }
