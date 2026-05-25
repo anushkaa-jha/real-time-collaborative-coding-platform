@@ -56,24 +56,32 @@
              <button>Run</button>
 
            </div>
+<!-- File Tabs -->
+<div class="tabs">
 
-            
+    <div class="tab active-tab" data-file="js">
+        main.js
+    </div>
+
+    <div class="tab" data-file="css">
+        style.css
+    </div>
+
+    <div class="tab add-tab">
+        +
+    </div>
+
+</div> 
             <!-- Editor Wrapper -->
 <div class="editor-wrapper">
 
     <!-- Fake Line Numbers -->
-    <div class="line-numbers">
-
-        1<br>
-        2<br>
-        3<br>
-        4<br>
-        5<br>
+    <div class="line-numbers" id="lineNumbers">
 
     </div>
 
     <!-- Code Editor -->
-    <textarea placeholder="Write your code here..."></textarea>
+    <textarea id="editor" placeholder="Write your code here...">console.log("Sync Your Project");</textarea>
 
 </div>
 

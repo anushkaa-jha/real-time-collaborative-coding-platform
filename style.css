@@ -240,3 +240,38 @@ textarea::-webkit-scrollbar-thumb {
 textarea::-webkit-scrollbar-track {
     background: transparent;
 }
+/* Tabs container */
+.tabs {
+    display: flex;
+
+    gap: 10px;
+
+    margin-top: 20px;
+}
+/* Single tab */
+.tab {
+    padding: 10px 18px;
+
+    border-radius: 10px 10px 0 0;
+
+    background: rgba(255,255,255,0.06);
+
+    backdrop-filter: blur(10px);
+
+    border: 1px solid rgba(255,255,255,0.08);
+
+    cursor: pointer;
+
+    transition: 0.3s;
+}
+/* Active tab */
+.active-tab {
+    background: rgba(124, 58, 237, 0.4);
+}
+/* Tab hover */
+.tab:hover {
+    background: rgba(255,255,255,0.12);
+}/* Plus tab */
+.add-tab {
+    font-weight: bold;
+}
