@@ -89,9 +89,10 @@ function createNewTab() {
     tabsContainer.insertBefore(newTab, addTab);
 
     // Remove active state from old tabs
-    tabs.forEach((t) => {
-        t.classList.remove("active-tab");
-    });
+    document.querySelectorAll(".tab").forEach((tab) => {
+
+    tab.classList.remove("active-tab");
+});
 
     // Activate new tab
     newTab.classList.add("active-tab");
@@ -138,101 +139,124 @@ editor.addEventListener("input", () => {
 });
 
 // Event delegation for tabs
-
-// Close tab functionality
+// Tab interactions
 tabsContainer.addEventListener("click", (event) => {
 
     // Check if close button clicked
-    if (!event.target.classList.contains("close-tab")) {
+    if (event.target.classList.contains("close-tab")) {
+
+        // Stop bubbling
+        event.stopPropagation();
+
+        // Get tab element
+        const tab = event.target.closest(".tab");
+
+        // Get all tabs except +
+        const allTabs = document.querySelectorAll(
+            ".tab:not(.add-tab)"
+        );
+
+        // Prevent deleting last tab
+        if (allTabs.length === 1) {
+            return;
+        }
+
+        // Check if active
+        const wasActive = tab.classList.contains("active-tab");
+        // Get previous tab
+        let previousTab = tab.previousElementSibling;
+
+        // Get filename
+        const fileName = tab.dataset.file;
+
+        // Delete file data
+        delete files[fileName];
+
+        // Remove tab
+        tab.remove();
+
+        // If active tab deleted
+        if (wasActive) {
+
+           // If no previous tab exists
+            // OR previous tab is +
+            // then select first remaining tab
+            if (
+                !previousTab ||
+                previousTab.classList.contains("add-tab")
+            ) {
+
+                previousTab = document.querySelector(
+                    ".tab:not(.add-tab)"
+                );
+            }
+
+            // Remove old active states
+            document.querySelectorAll(".tab").forEach((tab) => {
+
+                tab.classList.remove("active-tab");
+            });
+
+            // Activate tab
+            previousTab.classList.add("active-tab");
+
+            // Get new filename
+            const newFile = previousTab.dataset.file;
+
+            // Update state
+            activeFile = newFile;
+
+            // Load editor content
+            editor.value = files[newFile];
+            editor.focus();
+
+            // Update heading
+            fileNameDisplay.textContent =
+                `Editing: ${newFile}`;
+
+            // Update line numbers
+            updateLineNumbers();
+        }
+
         return;
     }
 
-    // Get parent tab
-    const tab = event.target.parentElement;
+    // Find clicked tab
+    const clickedTab = event.target.closest(".tab");
 
-    // Prevent deleting last file
-    const allTabs = document.querySelectorAll(".tab:not(.add-tab)");
-
-    if (allTabs.length === 1) {
+    // Ignore invalid clicks
+    if (!clickedTab) {
         return;
     }
 
-    // Check if tab is active
-     const wasActive = tab.classList.contains("active-tab");
-    // Get previous tab
-     const previousTab = tab.previousElementSibling;
-
-    // Remove file from object
-    const fileName = tab.dataset.file;
-
-    delete files[fileName];
-
-    // Remove tab from page
-    tab.remove();
-
-    // If deleted tab was active
-if (wasActive) {
-
-    // Ignore + tab
-    if (
-        previousTab &&
-        !previousTab.classList.contains("add-tab")
-    ) {
-
-        // Make previous tab active
-        previousTab.classList.add("active-tab");
-
-        // Get file name
-        const newFile = previousTab.dataset.file;
-
-        // Update active file state
-        activeFile = newFile;
-
-        // Load editor content
-        editor.value = files[newFile];
-
-        // Update heading
-        fileNameDisplay.textContent = `Editing: ${newFile}`;
-
-        // Refresh line numbers
-        updateLineNumbers();
-    }
-}
-
-});
-tabsContainer.addEventListener("click", (event) => {
-
-    // Get clicked element
-    const clickedTab = event.target;
-
-    // Check if clicked element has class "tab"
-    if (!clickedTab.classList.contains("tab")) {
-        return;
-    }
-
-    // Ignore + tab
+    // Ignore + button
     if (clickedTab.classList.contains("add-tab")) {
         return;
     }
 
-    // Remove active class from all tabs
+    // Remove old active tabs
     document.querySelectorAll(".tab").forEach((tab) => {
+
         tab.classList.remove("active-tab");
     });
 
-    // Add active class to clicked tab
+    // Activate clicked tab
     clickedTab.classList.add("active-tab");
 
-    // Get file type
+    // Get filename
     const fileName = clickedTab.dataset.file;
 
-    // Update active file
+    // Update state
     activeFile = fileName;
-    // Update heading
-    fileNameDisplay.textContent = `Editing: ${fileName}`;
 
-    // Load file content into editor
+    // Update heading
+    fileNameDisplay.textContent =
+        `Editing: ${fileName}`;
+
+    // Load content
     editor.value = files[fileName] || "";
+    // Focus editor
+    editor.focus();
 
     // Update line numbers
     updateLineNumbers();
