@@ -51,39 +51,41 @@
             <!-- Editor Top Bar -->
            <div class="editor-top">
 
-              <h2>Editor Area</h2>
+              <h2 id="fileNameDisplay">Editing: main.js</h2>
 
              <button>Run</button>
 
            </div>
-<!-- File Tabs -->
-<div class="tabs">
+              <!-- File Tabs -->
+               <div class="tabs" id="tabsContainer">
 
-    <div class="tab active-tab" data-file="js">
-        main.js
-    </div>
+                 <div class="tab active-tab" data-file="main.js">
+                 <span>🟨 main.js</span>
+                 <button class="close-tab">×</button>
+                 </div>
 
-    <div class="tab" data-file="css">
-        style.css
-    </div>
+                 <div class="tab" data-file="style.css">
+                 <span>🎨 style.css</span>
+                 <button class="close-tab">×</button>
+                 </div>
 
-    <div class="tab add-tab">
-        +
-    </div>
+                 <div class="tab add-tab" id="addTab">
+                 +
+                 </div>
 
-</div> 
-            <!-- Editor Wrapper -->
-<div class="editor-wrapper">
+                </div> 
+         <!-- Editor Wrapper -->
+         <div class="editor-wrapper">
 
-    <!-- Fake Line Numbers -->
-    <div class="line-numbers" id="lineNumbers">
+         <!-- Line Numbers -->
+         <div class="line-numbers" id="lineNumbers">
 
-    </div>
+         </div>
 
-    <!-- Code Editor -->
-    <textarea id="editor" placeholder="Write your code here...">console.log("Sync Your Project");</textarea>
+         <!-- Code Editor -->
+         <textarea id="editor" placeholder="Write your code here...">console.log("Sync Your Project");</textarea>
 
-</div>
+         </div>
 
             <!-- Output Section -->
             <div class="output-section">

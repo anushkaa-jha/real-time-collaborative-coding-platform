@@ -227,6 +227,8 @@ footer {
     font-family: monospace;
 
     line-height: 1.5;
+
+    overflow: hidden;
 }
 textarea::-webkit-scrollbar {
     width: 6px;
@@ -263,6 +265,25 @@ textarea::-webkit-scrollbar-track {
     cursor: pointer;
 
     transition: 0.3s;
+
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* Close tab button */
+.close-tab {
+    background: transparent;
+
+    border: none;
+
+    color: white;
+
+    cursor: pointer;
+
+    font-size: 14px;
+
+    padding: 0;
 }
 /* Active tab */
 .active-tab {
