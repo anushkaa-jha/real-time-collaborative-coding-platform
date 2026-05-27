@@ -1,3 +1,8 @@
+// Run button
+const runBtn = document.getElementById("runBtn");
+
+// Output iframe
+const outputFrame = document.getElementById("outputFrame");
 // File name display
 const fileNameDisplay = document.getElementById("fileNameDisplay");
 // Current active file
@@ -8,9 +13,6 @@ const tabsContainer = document.getElementById("tabsContainer");
 
 // Add tab button
 const addTab = document.getElementById("addTab");
-
-// Counter for untitled files
-let tabCount = 1;
 
 // Editor textarea
 const editor = document.getElementById("editor");
@@ -59,7 +61,6 @@ function getFileIcon(fileName) {
 // Create new tab
 function createNewTab() {
 
-    tabCount++;
 
     // Create tab element
     const newTab = document.createElement("div");
@@ -67,8 +68,12 @@ function createNewTab() {
     // Add classes
     newTab.classList.add("tab");
 
-    // File name
-    const fileName = `untitled${tabCount}.js`;
+    // Ask user for file name
+        const fileName = prompt("Enter file name");
+        // Stop if user cancels or leaves empty
+        if (!fileName) {
+            return;
+        }
      
     const icon = getFileIcon(fileName);
 
@@ -136,22 +141,24 @@ editor.addEventListener("input", () => {
 
     // Update line numbers
     updateLineNumbers();
+    // Auto update preview
+    runCode();
 });
 
 // Event delegation for tabs
 // Tab interactions
 tabsContainer.addEventListener("click", (event) => {
 
-    // Check if close button clicked
+    // CLOSE TAB
     if (event.target.classList.contains("close-tab")) {
 
-        // Stop bubbling
-        event.stopPropagation();
+        // Prevent other tab logic
+        event.stopImmediatePropagation();
 
-        // Get tab element
+        // Get tab
         const tab = event.target.closest(".tab");
 
-        // Get all tabs except +
+        // Get all real tabs
         const allTabs = document.querySelectorAll(
             ".tab:not(.add-tab)"
         );
@@ -161,90 +168,104 @@ tabsContainer.addEventListener("click", (event) => {
             return;
         }
 
-        // Check if active
-        const wasActive = tab.classList.contains("active-tab");
+        // Check if deleting active tab
+        const isActive =
+            tab.classList.contains("active-tab");
+
+        // Get next tab
+        let nextTab = tab.nextElementSibling;
+
         // Get previous tab
         let previousTab = tab.previousElementSibling;
 
-        // Get filename
-        const fileName = tab.dataset.file;
+        // Remove file data
+        delete files[tab.dataset.file];
 
-        // Delete file data
-        delete files[fileName];
-
-        // Remove tab
+        // Remove tab from DOM
         tab.remove();
 
-        // If active tab deleted
-        if (wasActive) {
+        // If deleted tab was active
+        if (isActive) {
 
-           // If no previous tab exists
-            // OR previous tab is +
-            // then select first remaining tab
+            let newActiveTab;
+
+            // Prefer next tab
             if (
-                !previousTab ||
-                previousTab.classList.contains("add-tab")
+                nextTab &&
+                !nextTab.classList.contains("add-tab")
             ) {
 
-                previousTab = document.querySelector(
-                    ".tab:not(.add-tab)"
-                );
+                newActiveTab = nextTab;
+
+            } else {
+
+                // Otherwise use previous tab
+                newActiveTab = previousTab;
             }
 
-            // Remove old active states
-            document.querySelectorAll(".tab").forEach((tab) => {
+            // Remove all active states
+            document.querySelectorAll(".tab")
+                .forEach((tab) => {
 
                 tab.classList.remove("active-tab");
             });
 
-            // Activate tab
-            previousTab.classList.add("active-tab");
+            // Activate chosen tab
+            newActiveTab.classList.add("active-tab");
 
-            // Get new filename
-            const newFile = previousTab.dataset.file;
+            // Get file name
+            const newFile =
+                newActiveTab.dataset.file;
 
             // Update state
             activeFile = newFile;
 
-            // Load editor content
-            editor.value = files[newFile];
-            editor.focus();
+            // Update editor
+            editor.value = files[newFile] || "";
 
             // Update heading
             fileNameDisplay.textContent =
                 `Editing: ${newFile}`;
 
-            // Update line numbers
+            // Focus editor
+            editor.focus();
+
+            // Refresh line numbers
             updateLineNumbers();
         }
 
         return;
     }
 
-    // Find clicked tab
-    const clickedTab = event.target.closest(".tab");
+    // TAB SWITCHING
+    const clickedTab =
+        event.target.closest(".tab");
 
-    // Ignore invalid clicks
+    // Invalid click
     if (!clickedTab) {
         return;
     }
 
-    // Ignore + button
-    if (clickedTab.classList.contains("add-tab")) {
+    // Ignore +
+    if (
+        clickedTab.classList.contains("add-tab")
+    ) {
         return;
     }
 
-    // Remove old active tabs
-    document.querySelectorAll(".tab").forEach((tab) => {
+    // Remove active states
+    document.querySelectorAll(".tab")
+        .forEach((tab) => {
 
         tab.classList.remove("active-tab");
     });
 
-    // Activate clicked tab
+    // Activate tab
     clickedTab.classList.add("active-tab");
 
     // Get filename
-    const fileName = clickedTab.dataset.file;
+    const fileName =
+        clickedTab.dataset.file;
 
     // Update state
     activeFile = fileName;
@@ -253,12 +274,14 @@ tabsContainer.addEventListener("click", (event) => {
     fileNameDisplay.textContent =
         `Editing: ${fileName}`;
 
-    // Load content
-    editor.value = files[fileName] || "";
+    // Load editor content
+    editor.value =
+        files[fileName] || "";
+
     // Focus editor
     editor.focus();
 
-    // Update line numbers
+    // Refresh line numbers
     updateLineNumbers();
 });
 
@@ -271,4 +294,145 @@ addTab.addEventListener("click", createNewTab);
 editor.addEventListener("scroll", () => {
 
     lineNumbers.scrollTop = editor.scrollTop;
+});
+// Run code function
+function runCode() {
+
+    // Get iframe document
+    const frameDocument =
+        outputFrame.contentWindow.document;
+
+    // Store different file contents
+    let htmlCode = "";
+
+    let cssCode = "";
+
+    let jsCode = "";
+
+    // Check every file
+    for (let fileName in files) {
+
+        // HTML file
+        if (fileName.endsWith(".html")) {
+
+            htmlCode = files[fileName];
+        }
+
+        // CSS file
+        else if (fileName.endsWith(".css")) {
+
+            cssCode = files[fileName];
+        }
+
+        // JavaScript file
+        else if (fileName.endsWith(".js")) {
+
+            jsCode = files[fileName];
+        }
+    }
+
+    // Write editor code into iframe
+    frameDocument.open();
+
+    frameDocument.write(`
+
+        <html>
+
+            <style>
+                ${cssCode}
+            </style>
+
+            <body>
+                ${htmlCode}
+            </body>
+
+            <script>
+                ${jsCode}
+            </script>
+
+        </html>
+
+    `);
+
+    frameDocument.close();
+
+    console.log(htmlCode);
+
+    console.log(cssCode);
+
+    console.log(jsCode);
+}
+    // Run button click
+    runBtn.addEventListener("click", runCode);
+
+// Rename file on double click
+tabsContainer.addEventListener("dblclick", (event) => {
+
+    // Get nearest tab
+    const clickedTab =
+        event.target.closest(".tab");
+
+    // Ignore invalid clicks
+    if (
+        !clickedTab ||
+        clickedTab.classList.contains("add-tab")
+    ) {
+        return;
+    }
+
+    // Get old file name
+    const oldFileName =
+        clickedTab.dataset.file;
+
+    // Ask user for new file name
+    const newFileName =
+        prompt(
+            "Enter new file name",
+            oldFileName
+        );
+
+    // Stop if empty
+    if (!newFileName) {
+        return;
+    }
+
+    // Prevent duplicate names
+    if (files[newFileName]) {
+
+        alert("File already exists");
+
+        return;
+    }
+
+    // Copy old content
+    files[newFileName] =
+        files[oldFileName];
+
+    // Delete old content
+    delete files[oldFileName];
+
+    // Update dataset
+    clickedTab.dataset.file =
+        newFileName;
+
+    // Update icon
+    const icon =
+        getFileIcon(newFileName);
+
+    // Find filename span
+    const fileSpan =
+        clickedTab.querySelector("span");
+
+    // Update visible filename
+    fileSpan.textContent =
+        `${icon} ${newFileName}`;
+
+    // Update active file if needed
+    if (activeFile === oldFileName) {
+
+        activeFile = newFileName;
+
+        fileNameDisplay.textContent =
+            `Editing: ${newFileName}`;
+    }
 });

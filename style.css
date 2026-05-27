@@ -296,3 +296,13 @@ textarea::-webkit-scrollbar-track {
 .add-tab {
     font-weight: bold;
 }
+/* Output iframe */
+iframe {
+    width: 100%;
+
+    height: 100%;
+
+    border: none;
+
+    background: white;
+}
