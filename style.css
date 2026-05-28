@@ -306,3 +306,12 @@ iframe {
 
     background: white;
 }
+
+/*Run Button*/
+#runBtn {
+    transition: 0.2s;
+}
+.running {
+    transform: scale(0.95);
+    opacity: 0.8;
+}

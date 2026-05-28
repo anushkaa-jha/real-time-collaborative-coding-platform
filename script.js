@@ -20,9 +20,6 @@ const editor = document.getElementById("editor");
 // Line number container
 const lineNumbers = document.getElementById("lineNumbers");
 
-// All tabs
-const tabs = document.querySelectorAll(".tab");
-
 
 // File data
 const files = {
@@ -58,6 +55,36 @@ function getFileIcon(fileName) {
     // Default icon
     return "📄";
 }
+
+//Generate starter code
+function getStarterTemplate(fileName) {
+    //HTML file
+    if (fileName.endsWith(".html")) {
+        return `<!DOCTYPE html>
+        <html>
+        <head>
+            <title>${fileName}</title>
+        </head>
+        <body>
+
+        </body>
+        </html>`;
+    }
+
+    //CSS file
+    if (fileName.endsWith(".css")) {
+        return `body{
+        }`;
+    }
+
+    //JavaScript file
+    if (fileName.endsWith(".js")) {
+        return `console.log("Hello World");`;
+    }
+    // Default starter template
+    return `// ${fileName}`;
+}
+
 // Create new tab
 function createNewTab() {
 
@@ -74,6 +101,11 @@ function createNewTab() {
         if (!fileName) {
             return;
         }
+        //Prevent duplicate file names
+        if (files[fileName]) {
+            alert("File already exists");
+            return;
+        }
      
     const icon = getFileIcon(fileName);
 
@@ -88,7 +120,7 @@ function createNewTab() {
     // Add file identifier
     newTab.dataset.file = fileName;
     // Empty file content
-    files[fileName] = "";
+    files[fileName] = getStarterTemplate(fileName);
 
     // Insert before + tab
     tabsContainer.insertBefore(newTab, addTab);
@@ -298,6 +330,9 @@ editor.addEventListener("scroll", () => {
 // Run code function
 function runCode() {
 
+    //Visual feedback for run button
+    runBtn.classList.add("running");
+
     // Get iframe document
     const frameDocument =
         outputFrame.contentWindow.document;
@@ -330,7 +365,22 @@ function runCode() {
             jsCode = files[fileName];
         }
     }
+    //No HTML found
+    if(!htmlCode.trim()) {
+        frameDocument.open();
 
+        frameDocument.write(`
+
+            <body
+                style="display:flex;align-items:center;justify-content:center;height:100vh;font-family:sans-serif;">
+                Create an HTML file to see the preview
+            </body>
+
+        `);
+        frameDocument.close();
+
+        return;
+    }
     // Write editor code into iframe
     frameDocument.open();
 
@@ -355,12 +405,10 @@ function runCode() {
     `);
 
     frameDocument.close();
+    setTimeout(() => {
 
-    console.log(htmlCode);
-
-    console.log(cssCode);
-
-    console.log(jsCode);
+        runBtn.classList.remove("running");
+    }, 200);
 }
     // Run button click
     runBtn.addEventListener("click", runCode);
@@ -434,5 +482,12 @@ tabsContainer.addEventListener("dblclick", (event) => {
 
         fileNameDisplay.textContent =
             `Editing: ${newFileName}`;
+    }
+});
+
+//Keyboard shortcut for running code (Ctrl + Enter)
+document.addEventListener("keydown", (event) => {
+    if(event.ctrlKey && event.key === "Enter") {
+        runCode();
     }
 });
