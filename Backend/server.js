@@ -28,8 +28,21 @@ const server = app.listen(PORT, () => {
 });
 const io = socketIO(server, { cors: {origin: "*"} });
 io.on("connection", (socket) => { console.log("User connected");
-    socket.on("message", (data) => {
-        console.log(data);
-        io.emit("message",data)
+    socket.on("code-change", (data) => {
+        socket.to(socket.roomId).emit("code-change", data);
+    });
+    socket.on("join-room", (roomId) => {
+        socket.join(roomId);
+        socket.roomId=roomId;
+        console.log("Joined room", roomId);
+    });
+    socket.on("create-file",(data)=>{
+        socket.to(socket.roomId).emit("create-file", data);
+    });
+    socket.on("rename-file",(data)=>{
+        socket.to(socket.roomId).emit("rename-file", data);
+    });
+    socket.on("delete-file",(data)=>{
+        socket.to(socket.roomId).emit("delete-file", data);
     });
  });

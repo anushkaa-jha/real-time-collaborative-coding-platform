@@ -1,7 +1,50 @@
 const socket = io("http://localhost:3000");
-socket.on("message", (data) => {
-    console.log("Received", data);
+socket.on("code-change", (data) => {
+    files[data.file] = data.code;
+    if(data.file === activeFile) {
+        editor.value = data.code;
+    updateLineNumbers();
+}
 });
+socket.on("create-file",(data)=>{
+    console.log("CREATE FILE EVENT:",data);
+    if(files[data.file]){
+       return;
+    }
+    files[data.file] =getStarterTemplate(data.file);
+    createTabUI(data.file);
+});
+socket.on("rename-file",(data)=>{
+    files[data.newName]=files[data.oldName];
+    delete files[data.oldName];
+    const tab=document.querySelector(`.tab[data-file="${data.oldName}"]`);
+    if(!tab){
+        return;
+    }
+    tab.dataset.file=data.newName;
+    const icon=getFileIcon(data.newName);
+    const fileSpan=tab.querySelector("span");
+    fileSpan.textContent=`${icon} ${data.newName}`;})
+socket.on("delete-file",(data)=>{
+    delete files[data.file];
+    const tab = document.querySelector(`.tab[data-file="${data.file}"]`);
+    if(tab){
+        const wasActive = tab.classList.contains("active-tab");
+        tab.remove();
+        if(wasActive){
+            const firstTab = document.querySelector(".tab:not(.add-tab)");
+            if(firstTab){
+                firstTab.classList.add("active-tab");
+                activeFile = firstTab.dataset.file;
+                editor.value = files[activeFile] || "";
+            }}
+        }
+});
+
+// DOM elements
+//ROOM JOINING
+const roomInput = document.getElementById("roomInput");
+const joinRoomBtn=document.getElementById("joinRoomBtn");
 
 // Run button
 const runBtn = document.getElementById("runBtn");
@@ -24,6 +67,19 @@ const editor = document.getElementById("editor");
 
 // Line number container
 const lineNumbers = document.getElementById("lineNumbers");
+
+//Current room
+let currentRoom="";
+joinRoomBtn.addEventListener("click", () => {
+    const roomId = roomInput.value.trim();
+    if(!roomId) {
+        alert("Please enter a room ID");
+        return;
+    }
+    socket.emit("join-room", roomId);
+    currentRoom=roomId;
+    alert(`Joined room ${roomId}`);
+});
 
 
 // File data
@@ -89,11 +145,21 @@ function getStarterTemplate(fileName) {
     // Default starter template
     return `// ${fileName}`;
 }
+function createTabUI(fileName){
+    const newTab = document.createElement("div");
 
+    // Add classes
+    newTab.classList.add("tab");
+    const icon=getFileIcon(fileName);
+    newTab.innerHTML = `<span>${icon} ${fileName}</span>
+    <button class="close-tab">
+        ×
+    </button>`;
+    newTab.dataset.file=fileName;
+    tabsContainer.insertBefore(newTab, addTab);
+}
 // Create new tab
 function createNewTab() {
-
-
     // Create tab element
     const newTab = document.createElement("div");
 
@@ -143,6 +209,8 @@ function createNewTab() {
     activeFile = fileName;
     fileNameDisplay.textContent = `Editing: ${fileName}`;
 
+    socket.emit("create-file", {file: fileName, room: currentRoom});
+
    // Empty editor
     editor.value = files[fileName];
     // Put cursor inside editor
@@ -180,6 +248,8 @@ editor.addEventListener("input", () => {
     updateLineNumbers();
     // Auto update preview
     runCode();
+    //Send code through socket
+    socket.emit("code-change", {file: activeFile, code: editor.value});
 });
 
 // Event delegation for tabs
@@ -217,7 +287,7 @@ tabsContainer.addEventListener("click", (event) => {
 
         // Remove file data
         delete files[tab.dataset.file];
-
+        socket.emit("delete-file", {file: tab.dataset.file});
         // Remove tab from DOM
         tab.remove();
 
@@ -479,6 +549,7 @@ tabsContainer.addEventListener("dblclick", (event) => {
     // Update visible filename
     fileSpan.textContent =
         `${icon} ${newFileName}`;
+    socket.emit("rename-file",{oldName: oldFileName, newName: newFileName});
 
     // Update active file if needed
     if (activeFile === oldFileName) {

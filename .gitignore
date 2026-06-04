@@ -1,3 +1,8 @@
+node_modules/
+Backend/node_modules/
+saved_code.txt
+desktop.ini
+...env
 # Logs
 logs
 *.log
