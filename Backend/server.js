@@ -3,6 +3,8 @@ const cors = require('cors');
 const fs = require('fs');
 const socketIO=require('socket.io');
 const app = express();
+const roomUsers = {};
+const roomFiles = {};
 app.use(cors());
 app.use(express.json());
 const PORT = 3000;
@@ -29,14 +31,32 @@ const server = app.listen(PORT, () => {
 const io = socketIO(server, { cors: {origin: "*"} });
 io.on("connection", (socket) => { console.log("User connected");
     socket.on("code-change", (data) => {
+        const roomId=socket.roomId;
+        if(roomFiles[roomId]){
+            roomFiles[roomId][data.file]=data.code;
+        }
         socket.to(socket.roomId).emit("code-change", data);
     });
     socket.on("join-room", (roomId) => {
         socket.join(roomId);
         socket.roomId=roomId;
-        console.log("Joined room", roomId);
+        if(!roomFiles[roomId]){
+            roomFiles[roomId]={};
+        }
+        if(!roomUsers[roomId]){
+            roomUsers[roomId]=[];
+        }if(!roomUsers[roomId].includes(socket.id)){
+        roomUsers[roomId].push(socket.id);
+        }
+        io.to(roomId).emit("user-list", roomUsers[roomId]);
+        console.log(roomUsers);
+        socket.emit("room-state", roomFiles[roomId]); 
     });
     socket.on("create-file",(data)=>{
+        const roomId=socket.roomId;
+        if(!roomFiles[roomId]){
+            roomFiles[roomId][data.file]="";
+        }
         socket.to(socket.roomId).emit("create-file", data);
     });
     socket.on("rename-file",(data)=>{
@@ -45,4 +65,19 @@ io.on("connection", (socket) => { console.log("User connected");
     socket.on("delete-file",(data)=>{
         socket.to(socket.roomId).emit("delete-file", data);
     });
+    socket.on("disconnect",(reason)=>{
+        console.log("User disconnected",socket.id, reason);
+        const roomId=socket.roomId;
+        console.log("Room ID on disconnect", roomId);
+        if(!roomId){
+            return;
+        }
+        roomUsers[roomId]=roomUsers[roomId].filter(id=>{return id !==socket.id});
+        if(roomUsers[roomId].length===0){
+            delete roomUsers[roomId];
+        }
+        io.to(roomId).emit("user-list", roomUsers[roomId]);
+        console.log("User left", socket.id);
+    });
+    
  });

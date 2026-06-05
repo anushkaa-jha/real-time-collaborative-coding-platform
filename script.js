@@ -40,8 +40,30 @@ socket.on("delete-file",(data)=>{
             }}
         }
 });
+socket.on("user-list",(users)=>{
+    renderUsers(users);
+});
+socket.on("room-state",(roomData)=>{
+    loadRoomState(roomData);
+});
+function loadRoomState(roomData){
+    for(let file in roomData){
+        if(!files[file]){
+            files[file]=roomData[file];
+            createTabUI(file);
+        }
+    }
+    if(!activeFile){
+        activeFile=Object.keys(files)[0];
+        editor.value=files[activeFile];
+        fileNameDisplay.textContent=`Editing: ${activeFile}`;
+        updateLineNumbers();
+    }
+}
 
-// DOM elements
+// DOM elements (SELECTORS)
+// User list
+const userList = document.getElementById("userList");
 //ROOM JOINING
 const roomInput = document.getElementById("roomInput");
 const joinRoomBtn=document.getElementById("joinRoomBtn");
@@ -218,6 +240,15 @@ function createNewTab() {
 
     // Update line numbers
     updateLineNumbers();
+}
+// Render user list
+function renderUsers(users) {
+    userList.innerHTML = "";
+    users.forEach((user,index)=>{
+        const li=document.createElement("li");
+        li.textContent=`🟢User ${index+1}`;
+        userList.appendChild(li);   
+    });
 }
 
 // FUNCTION → Update line numbers
