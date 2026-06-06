@@ -1,4 +1,4 @@
-const socket = io("http://localhost:3000");
+const socket = io("https://collaborative-ide-backend-0qyf.onrender.com");
 socket.on("code-change", (data) => {
     files[data.file] = data.code;
     if(data.file === firstFile) {
