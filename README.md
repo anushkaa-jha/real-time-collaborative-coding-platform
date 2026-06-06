@@ -1,98 +1,158 @@
-# real-time-collaborative-coding-platform
+# Real-Time Collaborative Coding Platform
 
-A browser based collaborative coding platform featuring multi file editing, live preview, dynamic file management and backend foundations for future real time collaboration.
+A browser-based real-time collaborative coding platform that enables multiple users to join shared rooms, create files, edit code together, and synchronize changes instantly across clients.
 
-## Features
+---
 
-### IDE Experience
+# Features
 
+## Real-Time Collaboration
+
+* Room-based collaboration system
+* Multi-user code synchronization using Socket.IO
+* Shared file management across users
+* Automatic room state reconstruction after refresh
+* Live active user tracking
+
+## IDE Features
+
+* Multi-file editing support
 * Interactive editor tabs
 * Dynamic file management
-* Multi file code execution
 * Live preview support
 * Dynamic line numbers
-* Starter templates for files
-* Keyboard shortcut support
+* Starter templates
+* Keyboard shortcuts
 
-### File Management
+## File Management
 
-* Dynamic file creation
-* File renaming support
+* Create files collaboratively
+* Rename files collaboratively
+* Delete files collaboratively
 * Duplicate file prevention
 * Automatic active tab recovery
-* File state persistence
+* Persistent room state
 
-### UI & Workflow
+## UI / Workflow
 
-* Modern glassmorphism UI
-* IDE style frontend layout
-* Improved developer workflow
-* Smooth file interactions
-* Run button animations
-* Interactive hover effects
+* Modern IDE-inspired layout
+* Glassmorphism UI
+* Interactive file tabs
+* Smooth workflow experience
 
-### Backend Progress
+## Deployment
 
-* Backend initialization completed
-* Express server setup
-* Basic routing support
-* JSON API responses
+* Frontend deployed publicly
+* Backend deployed publicly
+* Cloud-hosted realtime communication
 
-## Implemented
+---
 
-* Browser based IDE layout
-* Interactive tabs
-* Dynamic file system
-* Multi file execution
-* Live preview rendering
-* Dynamic line numbers
-* File switching system
-* Keyboard shortcut execution
-* Backend initialization
-* Express integration
+# Tech Stack
 
-## Todo
-
-* Real time collaboration
-* Rooms and session management
-* Live code synchronization
-* Chat support
-* Authentication
-* Real time cursor presence
-* AI code assistant
-* Docker sandbox execution
-* Deployment support
-* Mobile responsive improvements
-
-## Tech Stack
-
-### Frontend
+## Frontend
 
 * HTML
 * CSS
 * JavaScript
 
-### Backend
+## Backend
 
 * Node.js
 * Express.js
+* Socket.IO
 
-## Setup
+## Deployment
 
-git clone <repo-url>
+* Git
+* GitHub
+* Render
 
-cd real-time-collaborative-coding-platform
+---
 
-### Frontend
+# Project Architecture
 
-Open:
+Frontend
 
-index.html
+↓
 
-### Backend
+Socket.IO Connection
 
-cd backend
+↓
+
+Node + Express Backend
+
+↓
+
+Room State Management
+
+---
+
+# Installation
+
+## Clone Repository
+
+```bash
+git clone <repository-url>
+```
+
+## Backend Setup
+
+```bash
+cd Backend
 
 npm install
 
-node server.js
+npm start
+```
+
+## Frontend
+
+Open:
+
+```text
+index.html
+```
+
+inside browser.
+
+---
+
+# Usage
+
+1. Open project URL
+2. Join room
+3. Create files
+4. Edit collaboratively
+5. Open another browser window to test synchronization
+
+---
+
+# Future Improvements
+
+* Database Integration
+* Authentication System
+* React Migration
+* Cursor Presence
+* Chat Support
+* Project Dashboard
+
+---
+
+# Current Status
+
+✅ Realtime Collaboration
+
+✅ Socket Synchronization
+
+✅ Multi-user Rooms
+
+✅ Deployment Complete
+
+✅ Collaborative File System
+
+---
+
+# Author
+
+Anushka Jha
