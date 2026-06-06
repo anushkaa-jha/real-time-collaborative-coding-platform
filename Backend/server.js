@@ -7,7 +7,7 @@ const roomUsers = {};
 const roomFiles = {};
 app.use(cors());
 app.use(express.json());
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 app.get("/", (request, response) => {
     response.send("Server Running");
 });
@@ -54,15 +54,24 @@ io.on("connection", (socket) => { console.log("User connected");
     });
     socket.on("create-file",(data)=>{
         const roomId=socket.roomId;
-        if(!roomFiles[roomId]){
+        if(roomFiles[roomId]){
             roomFiles[roomId][data.file]="";
         }
         socket.to(socket.roomId).emit("create-file", data);
     });
     socket.on("rename-file",(data)=>{
+        const roomId=socket.roomId;
+        if(roomFiles[roomId]){
+            roomFiles[roomId][data.newName]=roomFiles[roomId][data.oldName];
+            delete roomFiles[roomId][data.oldName];
+        }
         socket.to(socket.roomId).emit("rename-file", data);
     });
     socket.on("delete-file",(data)=>{
+        const roomId=socket.roomId;
+        if(roomFiles[roomId]){
+            delete roomFiles[roomId][data.file];
+        }
         socket.to(socket.roomId).emit("delete-file", data);
     });
     socket.on("disconnect",(reason)=>{

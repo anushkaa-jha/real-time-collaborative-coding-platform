@@ -1,7 +1,7 @@
 const socket = io("http://localhost:3000");
 socket.on("code-change", (data) => {
     files[data.file] = data.code;
-    if(data.file === activeFile) {
+    if(data.file === firstFile) {
         editor.value = data.code;
     updateLineNumbers();
 }
@@ -11,7 +11,7 @@ socket.on("create-file",(data)=>{
     if(files[data.file]){
        return;
     }
-    files[data.file] =getStarterTemplate(data.file);
+    files[data.file] = "";
     createTabUI(data.file);
 });
 socket.on("rename-file",(data)=>{
@@ -35,8 +35,8 @@ socket.on("delete-file",(data)=>{
             const firstTab = document.querySelector(".tab:not(.add-tab)");
             if(firstTab){
                 firstTab.classList.add("active-tab");
-                activeFile = firstTab.dataset.file;
-                editor.value = files[activeFile] || "";
+                firstFile = firstTab.dataset.file;
+                editor.value = files[firstFile] || "";
             }}
         }
 });
@@ -47,16 +47,15 @@ socket.on("room-state",(roomData)=>{
     loadRoomState(roomData);
 });
 function loadRoomState(roomData){
+    tabsContainer.querySelectorAll(".tab:not(.add-tab)").forEach(tab=>tab.remove());
     for(let file in roomData){
-        if(!files[file]){
-            files[file]=roomData[file];
-            createTabUI(file);
-        }
+        files[file]=roomData[file];
+        createTabUI(file);
     }
-    if(!activeFile){
-        activeFile=Object.keys(files)[0];
-        editor.value=files[activeFile];
-        fileNameDisplay.textContent=`Editing: ${activeFile}`;
+    if(Object.keys(files).length > 0){
+        firstFile=Object.keys(files)[0];
+        editor.value=files[firstFile];
+        fileNameDisplay.textContent=`Editing: ${firstFile}`;
         updateLineNumbers();
     }
 }
@@ -76,7 +75,7 @@ const outputFrame = document.getElementById("outputFrame");
 // File name display
 const fileNameDisplay = document.getElementById("fileNameDisplay");
 // Current active file
-let activeFile = "main.js";
+let firstFile = "main.js";
 
 // Tabs container
 const tabsContainer = document.getElementById("tabsContainer");
@@ -105,22 +104,8 @@ joinRoomBtn.addEventListener("click", () => {
 
 
 // File data
-const files = {
-
-    "main.js": `console.log("Hello World");
-
-function test() {
-
-    return "JavaScript File";
-}`,
-
-    "style.css": `body {
-
-    background-color: black;
-
-    color: white;
-}`
-};// Get icon based on file type
+const files = {};
+// Get icon based on file type
 function getFileIcon(fileName) {
 
     // JavaScript file
@@ -228,7 +213,7 @@ function createNewTab() {
     newTab.classList.add("active-tab");
 
     // Set active file
-    activeFile = fileName;
+    firstFile = fileName;
     fileNameDisplay.textContent = `Editing: ${fileName}`;
 
     socket.emit("create-file", {file: fileName, room: currentRoom});
@@ -273,14 +258,14 @@ function updateLineNumbers() {
 editor.addEventListener("input", () => {
 
     // Save current editor content
-    files[activeFile] = editor.value;
+    files[firstFile] = editor.value;
 
     // Update line numbers
     updateLineNumbers();
     // Auto update preview
     runCode();
     //Send code through socket
-    socket.emit("code-change", {file: activeFile, code: editor.value});
+    socket.emit("code-change", {file: firstFile, code: editor.value});
 });
 
 // Event delegation for tabs
@@ -356,7 +341,7 @@ tabsContainer.addEventListener("click", (event) => {
                 newActiveTab.dataset.file;
 
             // Update state
-            activeFile = newFile;
+            firstFile = newFile;
 
             // Update editor
             editor.value = files[newFile] || "";
@@ -406,7 +391,7 @@ tabsContainer.addEventListener("click", (event) => {
         clickedTab.dataset.file;
 
     // Update state
-    activeFile = fileName;
+    firstFile = fileName;
 
     // Update heading
     fileNameDisplay.textContent =
@@ -583,9 +568,9 @@ tabsContainer.addEventListener("dblclick", (event) => {
     socket.emit("rename-file",{oldName: oldFileName, newName: newFileName});
 
     // Update active file if needed
-    if (activeFile === oldFileName) {
+    if (firstFile === oldFileName) {
 
-        activeFile = newFileName;
+        firstFile = newFileName;
 
         fileNameDisplay.textContent =
             `Editing: ${newFileName}`;
