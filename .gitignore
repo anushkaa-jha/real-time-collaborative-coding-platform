@@ -2,7 +2,8 @@ node_modules/
 Backend/node_modules/
 saved_code.txt
 desktop.ini
-...env
+.env
+
 # Logs
 logs
 *.log

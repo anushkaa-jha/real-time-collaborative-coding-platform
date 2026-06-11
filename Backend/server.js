@@ -1,7 +1,11 @@
-const express = require('express');
-const cors = require('cors');
+require('dotenv').config();//Loads environment variables from a .env file into process.env  
+const mongoose = require('mongoose');//Handles Database interactions
+const express = require('express');//Handles http requests and responses
+const cors = require('cors');//Enables Cross-Origin Resource Sharing (CORS) for handling requests from different origins
 const fs = require('fs');
-const socketIO=require('socket.io');
+const socketIO=require('socket.io');//Enables real-time, bidirectional communication between web clients and servers
+const Room = require("./Models/Room");
+
 const app = express();
 const roomUsers = {};
 const roomFiles = {};
@@ -24,7 +28,14 @@ app.post("/save", (request, response) => {
         response.json({ message: "Code saved successfully" });
     });
 });
-    
+
+mongoose.connect(process.env.MONGODB_URI)
+.then(() => {
+    console.log("Connected to MongoDB");
+})
+.catch((error) => {
+    console.error("Error connecting to MongoDB", error);
+});
 const server = app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });
@@ -37,9 +48,14 @@ io.on("connection", (socket) => { console.log("User connected");
         }
         socket.to(socket.roomId).emit("code-change", data);
     });
-    socket.on("join-room", (roomId) => {
+    socket.on("join-room", async (roomId) => {
         socket.join(roomId);
         socket.roomId=roomId;
+        let room = await Room.findOne({roomId});
+        if(!room){
+            room = await Room.create({roomId});
+            console.log("New room created", roomId);
+        }
         if(!roomFiles[roomId]){
             roomFiles[roomId]={};
         }
