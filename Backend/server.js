@@ -8,7 +8,6 @@ const Room = require("./Models/Room");
 
 const app = express();
 const roomUsers = {};
-const roomFiles = {};
 app.use(cors());
 app.use(express.json());
 const PORT = process.env.PORT || 3000;
@@ -41,12 +40,19 @@ const server = app.listen(PORT, () => {
 });
 const io = socketIO(server, { cors: {origin: "*"} });
 io.on("connection", (socket) => { console.log("User connected");
-    socket.on("code-change", (data) => {
+    socket.on("code-change", async(data) => {
         const roomId=socket.roomId;
-        if(roomFiles[roomId]){
-            roomFiles[roomId][data.file]=data.code;
+        const room=await Room.findOne({roomId});
+        if(!room){
+            return;
         }
-        socket.to(socket.roomId).emit("code-change", data);
+        const file = room.files.find(file => file.fileName === data.file);
+        if (file){
+            file.content = data.code;
+            await room.save();
+        }
+
+        socket.to(roomId).emit("code-change", data);
     });
     socket.on("join-room", async (roomId) => {
         socket.join(roomId);
@@ -56,9 +62,10 @@ io.on("connection", (socket) => { console.log("User connected");
             room = await Room.create({roomId});
             console.log("New room created", roomId);
         }
-        if(!roomFiles[roomId]){
-            roomFiles[roomId]={};
-        }
+        const roomState = {};
+        room.files.forEach(file => {
+            roomState[file.fileName] = file.content;
+        });
         if(!roomUsers[roomId]){
             roomUsers[roomId]=[];
         }if(!roomUsers[roomId].includes(socket.id)){
@@ -66,34 +73,62 @@ io.on("connection", (socket) => { console.log("User connected");
         }
         io.to(roomId).emit("user-list", roomUsers[roomId]);
         console.log(roomUsers);
-        socket.emit("room-state", roomFiles[roomId]); 
+        socket.emit("room-state", roomState); 
     });
-    socket.on("create-file",(data)=>{
+    socket.on("create-file",async(data)=>{
         const roomId=socket.roomId;
-        if(roomFiles[roomId]){
-            roomFiles[roomId][data.file]="";
-        }
-        socket.to(socket.roomId).emit("create-file", data);
+        const room=await Room.findOne({roomId});
+            if(!room){
+                return;
+            }
+            const existingFile = room.files.find(file => file.fileName === data.file);
+            if (existingFile) {
+                socket.emit("file-error", { message: "File already exists" });
+                return;
+            }
+            room.files.push({
+                fileName:data.file,
+                content:data.content
+            });
+            await room.save();
+        
+        socket.to(roomId).emit("create-file", data);
     });
-    socket.on("rename-file",(data)=>{
+    socket.on("rename-file", async(data)=>{
         const roomId=socket.roomId;
-        if(roomFiles[roomId]){
-            roomFiles[roomId][data.newName]=roomFiles[roomId][data.oldName];
-            delete roomFiles[roomId][data.oldName];
+        const room = await Room.findOne({roomId});
+        if(!room){
+            return;
         }
-        socket.to(socket.roomId).emit("rename-file", data);
+        const existingFile = room.files.find(file => 
+            file.fileName === data.newName);
+            if(existingFile){
+                socket.emit("file-error",{message:"File already exists"});
+                return;
+            }
+
+        const file = room.files.find(file => file.fileName === data.oldName);
+        if(!file){
+            return;
+        }
+        file.fileName= data.newName;
+         await room.save();
+
+        socket.to(roomId).emit("rename-file", data);
     });
-    socket.on("delete-file",(data)=>{
+    socket.on("delete-file", async(data)=>{
         const roomId=socket.roomId;
-        if(roomFiles[roomId]){
-            delete roomFiles[roomId][data.file];
+        const room = await Room.findOne({roomId});
+        if(!room){
+            return;
         }
-        socket.to(socket.roomId).emit("delete-file", data);
+        room.files=room.files.filter(file => file.fileName !== data.file)
+        await room.save();
+        socket.to(roomId).emit("delete-file", data);
     });
     socket.on("disconnect",(reason)=>{
         console.log("User disconnected",socket.id, reason);
         const roomId=socket.roomId;
-        console.log("Room ID on disconnect", roomId);
         if(!roomId){
             return;
         }

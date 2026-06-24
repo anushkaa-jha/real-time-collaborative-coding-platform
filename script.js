@@ -1,4 +1,4 @@
-const socket = io("https://collaborative-ide-backend-0qyf.onrender.com");
+const socket = io("https://collaborativeide-frontend-pjof.onrender.com");
 socket.on("code-change", (data) => {
     files[data.file] = data.code;
     if(data.file === firstFile) {
@@ -216,7 +216,7 @@ function createNewTab() {
     firstFile = fileName;
     fileNameDisplay.textContent = `Editing: ${fileName}`;
 
-    socket.emit("create-file", {file: fileName, room: currentRoom});
+    socket.emit("create-file", {file: fileName, content: files[fileName]});
 
    // Empty editor
     editor.value = files[fileName];
