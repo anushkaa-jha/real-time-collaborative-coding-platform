@@ -1,4 +1,6 @@
-const socket = io("https://collaborativeide-frontend-pjof.onrender.com");
+const socket = io(window.location.hostname === "127.0.0.1" || window.location.hostname === "localhost"
+  ? "http://localhost:3000"
+  : "https://collaborative-ide-backend-0qyf.onrender.com/");
 socket.on("code-change", (data) => {
     files[data.file] = data.code;
     if(data.file === firstFile) {
